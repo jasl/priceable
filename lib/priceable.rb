@@ -27,4 +27,4 @@ module Priceable
   end
 end
 
-ActiveRecord::Base.send(:extend, Priceable)
+ActiveRecord::Base.send(:extend, Priceable) if defined?(ActiveRecord)
