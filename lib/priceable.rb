@@ -1,4 +1,5 @@
 require "priceable/version"
+require "bigdecimal"
 
 module Priceable
   SUFFIXES = ["_in_cents", "_in_pennies", "_as_integer"]
@@ -6,15 +7,17 @@ module Priceable
     price_fields.each do |price_field|
       suffix = SUFFIXES.detect { |suffix| self.attribute_method? "#{price_field}#{suffix}".to_sym }
       raise ArgumentError, "Unable to find valid database field for `#{price_field}'" unless suffix
+
       define_method price_field do
-        unless send("#{price_field}#{suffix}".to_sym).nil?
-          send("#{price_field}#{suffix}".to_sym) / 100.0
+        if send(:"#{price_field}#{suffix}")
+          BigDecimal(send(:"#{price_field}#{suffix}")) / 100
         else
-          0.0
+          BigDecimal.new(0)
         end
       end
-      define_method "#{price_field}=".to_sym do |new_price|
-        send("#{price_field}#{suffix}=".to_sym, (new_price.to_f * 100).round)
+
+      define_method :"#{price_field}=" do |new_price|
+        send(:"#{price_field}#{suffix}=", (BigDecimal(new_price) * 100).to_i)
       end
     end
 
@@ -23,7 +26,6 @@ module Priceable
         attr_accessible *price_fields
       end
     end
-
   end
 end
 
