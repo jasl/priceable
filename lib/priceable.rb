@@ -17,7 +17,7 @@ module Priceable
       end
 
       define_method :"#{price_field}=" do |new_price|
-        send(:"#{price_field}#{suffix}=", (BigDecimal(new_price) * 100).to_i)
+        send(:"#{price_field}#{suffix}=", BigDecimal((new_price * 100).to_i))
       end
     end
 
